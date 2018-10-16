@@ -193,9 +193,17 @@ public class AzureSecurityRealm extends SecurityRealm {
                 LOGGER.info("Requesting oauth code time = " + (endTime - beginTime) + " ms");
             }
 
-            final String idToken = request.getParameter("id_token");
+            String idToken = request.getParameter("id_token");
+            if (StringUtils.isBlank(idToken)) {
+                try {
+                    idToken = request.getSubmittedForm().getString("id_token");
+                } catch (Exception e) {
+                    LOGGER.info("Attempted to extract form data from id_token");
+                }
+            }
 
             if (StringUtils.isBlank(idToken)) {
+                LOGGER.info("Cant extract id token from\n" + request);
                 throw new IllegalStateException("Can't extract id_token");
             }
             // validate the nonce to avoid CSRF
